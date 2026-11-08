@@ -4,6 +4,7 @@
 #include "csv2tensor/schema.hpp"
 #include "csv2tensor/encode.hpp"
 #include "csv2tensor/device.hpp"
+#include "tensor/device/layout.hpp"
 
 using namespace CSV;
 
@@ -22,16 +23,18 @@ int main(){
         fit(ts, 2, nullptr, &s);
         encoded_shape(ts, 2, &s, shape);
 
-        HOST::TENSOR h(shape, 3);
-        h.alloc();
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
         encode(ts, 2, &s, &h);
 
-        DEVICE::TENSOR  d(h.shape, h.stride, h.rank);
+        DEVICE::TENSOR  d(h.rank);
         DEVICE::TENSOR3 t3 = {};
         tensor_status::Status inner = tensor_status::TENSOR_BAD_PARAM;
 
         CHECK_STATUS("upload", upload(&h, &d, &t3, &inner), CSV_SUCCESS);
         CHECK("  inner == TENSOR_SUCCESS", inner == tensor_status::TENSOR_SUCCESS);
+        CHECK("  d recebeu copia do shape e do stride de h", d.shape != h.shape && d.stride != h.stride && eq3(d.shape, 2, 3, 7));
         CHECK("  TENSOR3 shape [2, 3, 7]", eq3(t3.shape, 2, 3, 7));
         CHECK("  TENSOR3 stride [21, 7, 1]", eq3(t3.stride, 21, 7, 1));
         CHECK("  TENSOR3 aponta para a memoria de d", t3.data == d.data && t3.data != nullptr);
@@ -42,15 +45,34 @@ int main(){
         for(size_t i = 0; i < h.n; i++) if(back[i] != h.data[i]) same = false;
         CHECK("  device_to_host devolve o que o encode escreveu", same);
     }
+    {
+        // h destruído depois do upload: d tem cópia própria de shape e stride.
+        size_t shape[3] = {1, 2, 2};
+        HOST::TENSOR* h = new HOST::TENSOR(3);
+        h->alloc_shape(shape);
+        h->alloc_data();
+        for(size_t i = 0; i < h->n; i++) h->data[i] = (float)i;
+
+        DEVICE::TENSOR  d(3);
+        DEVICE::TENSOR3 t3 = {};
+        CHECK_STATUS("upload", upload(h, &d, &t3), CSV_SUCCESS);
+        delete h;
+
+        DEVICE::TENSOR3 again = {};
+        CHECK("  to_tensor3(d) depois de destruir h", DEVICE::to_tensor3(&d, &again) == tensor_status::TENSOR_SUCCESS && eq3(again.shape, 1, 2, 2));
+    }
 
     SECTION("upload: erros");
     {
         size_t shape[3] = {1, 2, 2};
-        HOST::TENSOR h(shape, 3);
-        h.alloc();
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
 
         size_t outro[3] = {1, 2, 3}, outro_st[3] = {6, 3, 1};
-        DEVICE::TENSOR d(outro, outro_st, 3);
+        DEVICE::TENSOR d(3);
+        d.alloc_shape(outro);
+        d.alloc_stride(outro_st);
         DEVICE::TENSOR3 t3 = {};
         tensor_status::Status inner = tensor_status::TENSOR_SUCCESS;
 
@@ -58,19 +80,31 @@ int main(){
         CHECK("  inner == TENSOR_FEED_SHAPE_MISMATCH", inner == tensor_status::TENSOR_FEED_SHAPE_MISMATCH);
     }
     {
-        size_t shape[3] = {1, 2, 2}, st[3] = {4, 2, 1};
-        HOST::TENSOR h(shape, 3);                // sem alloc
-        DEVICE::TENSOR d(shape, st, 3);
+        size_t shape[3] = {1, 2, 2};
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);                    // sem alloc_data
+        DEVICE::TENSOR d(3);
         DEVICE::TENSOR3 t3 = {};
-        tensor_status::Status inner = tensor_status::TENSOR_SUCCESS;
 
-        CHECK_STATUS("h sem alloc", upload(&h, &d, &t3, &inner), CSV_DEVICE_FEED_FAILED);
-        CHECK("  inner == TENSOR_FEED_NULL_DATA", inner == tensor_status::TENSOR_FEED_NULL_DATA);
+        CHECK_STATUS("h sem alloc_data", upload(&h, &d, &t3), CSV_DEVICE_HOST_NOT_ALLOCATED);
+        CHECK("  d nao foi tocado", d.shape == nullptr && d.data == nullptr);
     }
     {
-        size_t shape[3] = {1, 2, 2}, st[3] = {4, 2, 1};
-        HOST::TENSOR h(shape, 3);
-        DEVICE::TENSOR d(shape, st, 3);
+        size_t shape[3] = {1, 2, 2};
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
+        DEVICE::TENSOR d(2);
+        DEVICE::TENSOR3 t3 = {};
+
+        CHECK_STATUS("d com rank 2, h com rank 3", upload(&h, &d, &t3), CSV_DEVICE_RANK_MISMATCH);
+    }
+    {
+        size_t shape[3] = {1, 2, 2};
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
+        DEVICE::TENSOR d(3);
         DEVICE::TENSOR3 t3 = {};
         CHECK_STATUS("h nulo", upload(nullptr, &d, &t3), CSV_DEVICE_NULL_PARAM);
         CHECK_STATUS("d nulo", upload(&h, nullptr, &t3), CSV_DEVICE_NULL_PARAM);

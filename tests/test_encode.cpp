@@ -46,8 +46,9 @@ int main(){
         CHECK_STATUS("encoded_shape", encoded_shape(&a, &s, shape), CSV_SUCCESS);
         CHECK("  [1, 3, 6]", shape_is(shape, 1, 3, 6));
 
-        HOST::TENSOR h(shape, 3);
-        h.alloc();
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
         CHECK_STATUS("encode", encode(&a, &s, &h), CSV_SUCCESS);
         //                 idade  altura  Recife SP   nao sim
         CHECK("  numeros e one-hot (cidade, ativo)", matrix_is(h, 0, {
@@ -67,8 +68,9 @@ int main(){
         CHECK_STATUS("encoded_shape", encoded_shape(ts, 2, &s, shape), CSV_SUCCESS);
         CHECK("  [2, 3, 7]", shape_is(shape, 2, 3, 7));
 
-        HOST::TENSOR h(shape, 3);
-        h.alloc();
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
         CHECK_STATUS("encode", encode(ts, 2, &s, &h), CSV_SUCCESS);
         //                 idade  altura  Curitiba Recife SP   nao sim
         CHECK("  matriz 0 (pessoas.csv)", matrix_is(h, 0, {
@@ -89,8 +91,9 @@ int main(){
         fit(&a, nullptr, &s);                    // sem Curitiba
 
         size_t shape[3] = {1, 3, s.width};
-        HOST::TENSOR h(shape, 3);
-        h.alloc();
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
         POSITION p{};
         CHECK_STATUS("categoria que nao apareceu no fit", encode(&b, &s, &h, &p), CSV_ENCODE_UNKNOWN_CATEGORY);
         CHECK("  Curitiba: linha 2, coluna 3", at(p, 0, 2, 3));
@@ -100,8 +103,9 @@ int main(){
         SCHEMA s;
         fit(&train, nullptr, &s);
         size_t shape[3] = {1, 2, 1};
-        HOST::TENSOR h(shape, 3);
-        h.alloc();
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
         POSITION p{};
         CHECK_STATUS("texto em coluna NUMERIC", encode(&test, &s, &h, &p), CSV_ENCODE_NOT_NUMBER);
         CHECK("  linha 2, coluna 1", at(p, 0, 2, 1));
@@ -111,8 +115,9 @@ int main(){
         SCHEMA s;
         fit(&train, nullptr, &s);
         size_t shape[3] = {1, 1, 2};
-        HOST::TENSOR h(shape, 3);
-        h.alloc();
+        HOST::TENSOR h(3);
+        h.alloc_shape(shape);
+        h.alloc_data();
         POSITION p{};
         CHECK_STATUS("celula vazia", encode(&test, &s, &h, &p), CSV_ENCODE_EMPTY_CELL);
         CHECK("  linha 2, coluna 2", at(p, 0, 2, 2));
@@ -143,17 +148,20 @@ int main(){
         fit(&a, nullptr, &s);
 
         size_t certo[3] = {1, 3, 6};
-        HOST::TENSOR sem_alloc(certo, 3);
-        CHECK_STATUS("tensor sem alloc", encode(&a, &s, &sem_alloc), CSV_ENCODE_NOT_ALLOCATED);
+        HOST::TENSOR sem_alloc(3);
+        sem_alloc.alloc_shape(certo);            // sem alloc_data
+        CHECK_STATUS("tensor sem alloc_data", encode(&a, &s, &sem_alloc), CSV_ENCODE_NOT_ALLOCATED);
 
         size_t errado[3] = {1, 3, 5};
-        HOST::TENSOR estreito(errado, 3);
-        estreito.alloc();
+        HOST::TENSOR estreito(3);
+        estreito.alloc_shape(errado);
+        estreito.alloc_data();
         CHECK_STATUS("shape [1, 3, 5] em vez de [1, 3, 6]", encode(&a, &s, &estreito), CSV_ENCODE_SHAPE_MISMATCH);
 
         size_t r2[2] = {3, 6};
-        HOST::TENSOR rank2(r2, 2);
-        rank2.alloc();
+        HOST::TENSOR rank2(2);
+        rank2.alloc_shape(r2);
+        rank2.alloc_data();
         CHECK_STATUS("rank 2", encode(&a, &s, &rank2), CSV_ENCODE_SHAPE_MISMATCH);
 
         CHECK_STATUS("out nulo", encode(&a, &s, nullptr), CSV_ENCODE_NULL_PARAM);

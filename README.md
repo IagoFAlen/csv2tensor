@@ -18,7 +18,7 @@ arquivo.csv ─parse_file─► TABLE ─fit─► SCHEMA ─encode─► HOST::
 1. **`parse_file` / `parse_string`**: lê o CSV (RFC 4180: aspas, `""`, quebra de linha dentro de aspas, `\r\n`, BOM) e devolve as células como texto.
 2. **`fit`**: decide o tipo de cada coluna. É número se toda célula é um número finito (com ponto decimal, sem depender do locale); senão é categoria, com as categorias em ordem alfabética. O tipo de uma coluna pode ser forçado, por exemplo para classes escritas como `0, 1, 2` virarem one-hot.
 3. **`encode`**: escreve um `HOST::TENSOR`. Um CSV vira `[1, linhas, colunas]`; vários CSVs com as mesmas colunas e o mesmo número de linhas viram o batch `[n, linhas, colunas]`.
-4. **`upload`**: aloca na GPU, copia e monta o `TENSOR3`.
+4. **`upload`**: monta o `DEVICE::TENSOR` com o shape e o stride de `h`, aloca na GPU, copia e monta o `TENSOR3`.
 
 Para treino e teste, faça o `fit` uma vez e use o mesmo `SCHEMA` nos outros CSVs. Assim cada coluna do tensor quer dizer a mesma coisa em todos.
 
@@ -47,11 +47,12 @@ int main(){
         return 1;
     }
 
-    HOST::TENSOR h(shape, 3);              // shape precisa viver tanto quanto h
-    h.alloc();
+    HOST::TENSOR h(3);
+    h.alloc_shape(shape);                  // copia o shape
+    h.alloc_data();
     CSV::encode(&table, &schema, &h);
 
-    DEVICE::TENSOR  d(h.shape, h.stride, h.rank);
+    DEVICE::TENSOR  d(h.rank);             // o upload copia shape e stride de h
     DEVICE::TENSOR3 t3;                    // vale enquanto d existir
     CSV::upload(&h, &d, &t3);
 

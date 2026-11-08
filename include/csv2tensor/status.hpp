@@ -40,7 +40,9 @@ namespace CSV {
 
         // GPU (device.cpp). O status da lib tensor que causou a falha vai em *inner.
         CSV_DEVICE_NULL_PARAM,          // upload: h, d ou out == nullptr
-        CSV_DEVICE_ALLOC_FAILED,        // upload: DEVICE::TENSOR::alloc falhou
+        CSV_DEVICE_HOST_NOT_ALLOCATED,  // upload: h sem shape, stride ou data (alloc_shape/alloc_data não chamados)
+        CSV_DEVICE_RANK_MISMATCH,       // upload: d->rank != h->rank
+        CSV_DEVICE_ALLOC_FAILED,        // upload: alloc_shape, alloc_stride ou alloc_data de d falhou
         CSV_DEVICE_FEED_FAILED,         // upload: DEVICE::TENSOR::feed falhou (shape/stride de d diferente de h, h sem alloc, cópia)
         CSV_DEVICE_LAYOUT_FAILED,       // upload: DEVICE::to_tensor3 falhou
 

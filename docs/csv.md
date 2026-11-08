@@ -21,11 +21,12 @@ CSV::parse_file("dados.csv", nullptr, &t);
 CSV::fit(&t, nullptr, &s);
 CSV::encoded_shape(&t, &s, shape);
 
-HOST::TENSOR h(shape, 3);              // shape precisa viver tanto quanto h
-h.alloc();
+HOST::TENSOR h(3);
+h.alloc_shape(shape);                  // copia o shape
+h.alloc_data();
 CSV::encode(&t, &s, &h);
 
-DEVICE::TENSOR  d(h.shape, h.stride, h.rank);
+DEVICE::TENSOR  d(h.rank);             // o upload copia shape e stride de h
 DEVICE::TENSOR3 t3;
 CSV::upload(&h, &d, &t3);              // t3 vale enquanto d existir
 ```
@@ -78,12 +79,12 @@ Faça o `fit` uma vez (no CSV de treino, ou em todos juntos) e use o mesmo `SCHE
 ## 3. Codificação (`encoded_shape`, `encode`)
 
 - `encoded_shape` devolve `[count, rows, schema->width]`.
-- `encode` escreve no `HOST::TENSOR` pelo stride dele. Precisa de rank 3 e do shape exato, e o `alloc()` já precisa ter sido chamado.
+- `encode` escreve no `HOST::TENSOR` pelo stride dele. Precisa de rank 3 e do shape exato, e o `alloc_shape` e o `alloc_data` já precisam ter sido chamados.
 - Todas as tabelas do batch precisam do mesmo número de linhas e, se tiverem cabeçalho, do mesmo cabeçalho do `fit`.
 
 ## 4. GPU (`upload`)
 
-`alloc` + `feed` + `DEVICE::to_tensor3` da lib tensor. O `feed` confere que `d` tem o shape e o stride de `h`. Se algo falha, o `CSV_DEVICE_*` diz qual passo foi, e `inner` traz o `tensor_status::Status` da lib tensor.
+`alloc_shape` + `alloc_stride` + `alloc_data` + `feed` + `DEVICE::to_tensor3` da lib tensor. `d` só precisa do rank: o `upload` copia o shape e o stride de `h` para ele, e `d` continua valendo depois que `h` é destruído. Se `d` já tiver shape ou stride, eles ficam, e o `feed` confere que batem com os de `h`. Se algo falha, o `CSV_DEVICE_*` diz qual passo foi, e `inner` traz o `tensor_status::Status` da lib tensor.
 
 ## Erros e `POSITION`
 

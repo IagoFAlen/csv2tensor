@@ -73,16 +73,18 @@ int main(int argc, char** argv){
     st = encoded_shape(ptrs.data(), ptrs.size(), &schema, shape, &p);
     if(st != CSV_SUCCESS) return report("encoded_shape", st, &p, paths);
 
-    HOST::TENSOR h(shape, 3);
-    if(h.alloc() != tensor_status::TENSOR_SUCCESS){
-        std::fprintf(stderr, "HOST::TENSOR::alloc falhou\n");
+    HOST::TENSOR h(3);
+    tensor_status::Status hs = h.alloc_shape(shape);
+    if(hs == tensor_status::TENSOR_SUCCESS) hs = h.alloc_data();
+    if(hs != tensor_status::TENSOR_SUCCESS){
+        std::fprintf(stderr, "HOST::TENSOR: %s\n", tensor_status::status_name(hs));
         return 1;
     }
 
     st = encode(ptrs.data(), ptrs.size(), &schema, &h, &p);
     if(st != CSV_SUCCESS) return report("encode", st, &p, paths);
 
-    DEVICE::TENSOR  d(h.shape, h.stride, h.rank);
+    DEVICE::TENSOR  d(h.rank);                  // o upload copia shape e stride de h
     DEVICE::TENSOR3 t3 = {};
     tensor_status::Status inner = tensor_status::TENSOR_SUCCESS;
 
