@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include "csv/status.hpp"
-#include "csv/table.hpp"
+#include "csv2tensor/status.hpp"
+#include "csv2tensor/table.hpp"
 
 // Schema: decide o que cada coluna do CSV vira no tensor (número ou one-hot).
 namespace CSV {

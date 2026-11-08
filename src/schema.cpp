@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <utility>
-#include "csv/schema.hpp"
+#include "csv2tensor/schema.hpp"
 #include "number.hpp"
 
 namespace CSV {

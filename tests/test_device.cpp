@@ -1,9 +1,9 @@
 // upload: HOST::TENSOR -> GPU -> TENSOR3, de ponta a ponta a partir do CSV.
 #include "check.hpp"
-#include "csv/table.hpp"
-#include "csv/schema.hpp"
-#include "csv/encode.hpp"
-#include "csv/device.hpp"
+#include "csv2tensor/table.hpp"
+#include "csv2tensor/schema.hpp"
+#include "csv2tensor/encode.hpp"
+#include "csv2tensor/device.hpp"
 
 using namespace CSV;
 

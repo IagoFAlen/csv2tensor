@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include "csv/status.hpp"
+#include "csv2tensor/status.hpp"
 
 // Leitura do CSV: texto -> células (ainda como texto). Nenhuma conversão para número aqui.
 namespace CSV {

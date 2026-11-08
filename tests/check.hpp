@@ -2,7 +2,7 @@
 #pragma once
 
 #include <cstdio>
-#include "csv/status.hpp"
+#include "csv2tensor/status.hpp"
 
 static int g_fails = 0;
 

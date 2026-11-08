@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+# csv2tensor usa os tipos da tensor na API (HOST::TENSOR, DEVICE::TENSOR3).
+include(CMakeFindDependencyMacro)
+find_dependency(tensor 0.1)
+
+include("${CMAKE_CURRENT_LIST_DIR}/csv2tensorTargets.cmake")
+check_required_components(csv2tensor)

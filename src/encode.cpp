@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "csv/encode.hpp"
+#include "csv2tensor/encode.hpp"
 #include "number.hpp"
 
 namespace CSV {

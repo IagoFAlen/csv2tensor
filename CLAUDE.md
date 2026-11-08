@@ -11,12 +11,13 @@ Converte CSV em tensor da lib [tensor](../tensor): CSV → `TABLE` → `SCHEMA` 
 
 ## Padrões
 
-- Um `Status` por verificação (`include/csv/status.hpp`), com prefixo `CSV_`. Nome de status e de enum via tabela indexada pelo enum, nunca `switch`.
+- Um `Status` por verificação (`include/csv2tensor/status.hpp`), com prefixo `CSV_`. Nome de status e de enum via tabela indexada pelo enum, nunca `switch`.
 - Funções devolvem `Status`; o resultado sai por ponteiro. Se a falha tem lugar no CSV, preenche `POSITION`.
 - Em caso de falha, `out` fica intacto (exceto `encode`, que escreve direto no tensor).
 - Os headers da tensor fazem `using namespace tensor_status;` no escopo global: fora do `namespace CSV`, escreva `CSV::Status`.
 
 ## Ambiente
 
-- A lib tensor é incluída por `add_subdirectory` a partir de `../tensor` (`-DTENSOR_DIR=...` para outro lugar).
+- Headers em `include/csv2tensor/`; os da tensor como `"tensor/host/tensor.hpp"`. As duas libs se instalam em `/usr/local` com `cmake --install` ([docs/build.md](docs/build.md)).
+- A tensor vem do `find_package(tensor)` (instalada). Para desenvolver as duas juntas: `-DTENSOR_DIR=../tensor`.
 - O `git` está instalado só no WSL. A partir do Windows, use `wsl git ...`.

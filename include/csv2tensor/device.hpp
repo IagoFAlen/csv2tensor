@@ -1,9 +1,9 @@
 #pragma once
 
-#include "host/tensor.hpp"      // lib tensor
-#include "device/tensor.hpp"    // lib tensor
-#include "status.hpp"           // lib tensor: tensor_status::Status
-#include "csv/status.hpp"
+#include "tensor/host/tensor.hpp"      // lib tensor
+#include "tensor/device/tensor.hpp"    // lib tensor
+#include "tensor/status.hpp"           // lib tensor: tensor_status::Status
+#include "csv2tensor/status.hpp"
 
 // Último passo: HOST::TENSOR -> GPU -> TENSOR3.
 namespace CSV {

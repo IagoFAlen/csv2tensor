@@ -2,7 +2,7 @@
 #include <cstring>
 #include <initializer_list>
 #include "check.hpp"
-#include "csv/table.hpp"
+#include "csv2tensor/table.hpp"
 
 using namespace CSV;
 

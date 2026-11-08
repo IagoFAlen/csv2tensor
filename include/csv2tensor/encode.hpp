@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstddef>
-#include "host/tensor.hpp"      // lib tensor
-#include "csv/status.hpp"
-#include "csv/table.hpp"
-#include "csv/schema.hpp"
+#include "tensor/host/tensor.hpp"      // lib tensor
+#include "csv2tensor/status.hpp"
+#include "csv2tensor/table.hpp"
+#include "csv2tensor/schema.hpp"
 
 // Codificação: tabelas + schema -> HOST::TENSOR [batch, linhas, colunas].
 namespace CSV {

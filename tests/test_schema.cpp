@@ -2,8 +2,8 @@
 #include <cstring>
 #include <initializer_list>
 #include "check.hpp"
-#include "csv/table.hpp"
-#include "csv/schema.hpp"
+#include "csv2tensor/table.hpp"
+#include "csv2tensor/schema.hpp"
 
 using namespace CSV;
 

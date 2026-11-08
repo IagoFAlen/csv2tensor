@@ -1,7 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include <utility>
-#include "csv/table.hpp"
+#include "csv2tensor/table.hpp"
 
 namespace CSV {
 

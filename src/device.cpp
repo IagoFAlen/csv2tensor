@@ -1,5 +1,5 @@
-#include "csv/device.hpp"
-#include "device/layout.hpp"    // lib tensor: DEVICE::to_tensor3
+#include "csv2tensor/device.hpp"
+#include "tensor/device/layout.hpp"    // lib tensor: DEVICE::to_tensor3
 
 namespace CSV {
 
